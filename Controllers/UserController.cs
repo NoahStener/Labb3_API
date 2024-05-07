@@ -9,16 +9,16 @@ namespace Labb3_API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private IUserRepository _userRepository;
+        private IUser _userRepository;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(IUser userRepository)
         {
             _userRepository = userRepository;
         }
 
 
         [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<ActionResult> GetAllUsers()
         {
             try
             {
@@ -32,15 +32,34 @@ namespace Labb3_API.Controllers
             
         }
 
-        [HttpGet("GetInterests/{userId:int}")]
-        public async Task<IActionResult> GetInterestByUserId(int userId)
+        [HttpGet("GetAllInterests")]
+        public async Task<ActionResult> GetAllInterests()
         {
             try
             {
+                return Ok(await _userRepository.GetAllInterests());
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error getting data from database");
+            }
+        }
+
+        [HttpGet("GetInterests/{userId:int}")]
+        public async Task<ActionResult> GetInterestByUserId(int userId)
+        {
+            try
+            {
+                var userExists = await _userRepository.UserExists(userId);
+                if(!userExists)
+                {
+                    return NotFound($"User with ID: {userId} was not found");
+                }
+
                 var interests = await _userRepository.GetUserInterests(userId);
                 if(interests == null)
                 {
-                    return NotFound();
+                    return NotFound("Interests not found for the user");
                 }
                 return Ok(interests);
             }
@@ -52,14 +71,20 @@ namespace Labb3_API.Controllers
         }
 
         [HttpGet("GetLinks/{userId:int}")]
-        public async Task<IActionResult> GetLinksByUserId(int userId)
+        public async Task<ActionResult> GetLinksByUserId(int userId)
         {
             try
             {
+                var userExists = await _userRepository.UserExists(userId);
+                if (!userExists)
+                {
+                    return NotFound($"User with ID: {userId} was not found");
+                }
+
                 var links = await _userRepository.GetUserLinks(userId);
                 if(links == null)
                 {
-                    return NotFound();
+                    return NotFound("Links for user not found");
                 }
                 return Ok(links);
             }
@@ -71,18 +96,18 @@ namespace Labb3_API.Controllers
         }
 
         [HttpPost("AddInterest/{userId:int}")]
-        public async Task<IActionResult> AddInterestToUserById(int userId, int interestId)
+        public async Task<ActionResult> AddInterestToUserById(int userId, int interestId)
         {
             try
             {
-
-                if (userId == 0 || interestId == 0)
+                var userExists = await _userRepository.UserExists(userId);
+                if (!userExists)
                 {
-                    return BadRequest("Invalid userID or interestID");
+                    return BadRequest("Invalid userID");
                 }
 
                 await _userRepository.AddInterestToUser(userId, interestId);
-                return Ok($"Interest with id : {interestId} added to user : {userId}");
+                return Ok($"Interest with ID: {interestId} added to user with ID: {userId}");
 
             }
             catch (Exception)
@@ -94,17 +119,17 @@ namespace Labb3_API.Controllers
         }
 
         [HttpPost("AddLinkToInterest{userId:int}")]
-        public async Task<IActionResult> AddLinkToUserInterestById(int userId,int interestId, string url)
+        public async Task<ActionResult> AddLinkToUserInterestById(int userId,int interestId, string url)
         {
             try
             {
-                if(userId == 0 || interestId == 0 || string.IsNullOrEmpty(url))
+                if (string.IsNullOrEmpty(url))
                 {
                     return BadRequest("Invalid input");
                 }
 
                 await _userRepository.AddLinkToUserInterest(userId, interestId, url);
-                return Ok($"{url} added to interest id : {interestId} for user with id : {userId}");
+                return Ok($"{url} added to interest ID: {interestId} for user with ID: {userId}");
 
             }
             catch (Exception)

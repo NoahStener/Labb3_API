@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Labb3_API.Services
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : IUser
     {
         private Labb3DbContext _labb3Dbcontext;
 
@@ -50,6 +50,11 @@ namespace Labb3_API.Services
             return await _labb3Dbcontext.Users.ToListAsync();
         }
 
+        public async Task<IEnumerable<Interest>> GetAllInterests()
+        {
+            return await _labb3Dbcontext.Interests.ToListAsync();
+        }
+
         public async Task<IEnumerable<Interest>> GetUserInterests(int userId)
         {
             return await _labb3Dbcontext.UserInterests.Where(u => u.UserID == userId)
@@ -60,6 +65,12 @@ namespace Labb3_API.Services
         {
             return await _labb3Dbcontext.UserInterests.Where(u => u.UserID == userId)
                 .SelectMany(u => u.Links).ToListAsync();
+        }
+
+        public async Task<bool> UserExists(int userId)
+        {
+            return await _labb3Dbcontext.Users.AnyAsync(u => u.UserID == userId);
+
         }
     }
 }

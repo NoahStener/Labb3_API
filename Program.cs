@@ -22,7 +22,7 @@ namespace Labb3_API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUser, UserRepository>();
 
 
             builder.Services.AddDbContext<Labb3DbContext>(options =>
