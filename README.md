@@ -4,7 +4,14 @@ Response: Lista av användare
 Statuskoder: 
   200 Ok Lyckades hämta listan, 
   500 Internal Server Error
-
+  
+GET /api/User/GetAllInterests
+Beskrivning: Hämtar lista av alla intressen
+Response: Lista av intressen
+Statuskoder: 
+  200 Ok Lyckades hämta listan, 
+  500 Internal Server Error
+  
 GET /api/User/GetInterests/{userId}
 Beskrivning: Hämtar alla intressen kopplade till userID
 Response: Lista av intressen för användaren
